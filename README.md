@@ -15,7 +15,7 @@ A backend service that accepts product/offer information and CSV files of leads,
 
 - **Backend**: Node.js + Express
 - **Database**: Supabase (PostgreSQL with Row Level Security)
-- **AI Provider**: OpenAI GPT-3.5 Turbo
+- **AI Provider**: Groq (Llama 3)
 - **File Processing**: Multer + csv-parser
 
 ## Setup Instructions
@@ -23,41 +23,54 @@ A backend service that accepts product/offer information and CSV files of leads,
 ### Prerequisites
 
 - Node.js 14+ installed
-- OpenAI API key ([Get one here](https://platform.openai.com/api-keys))
+- Groq API key ([Get one here](https://console.groq.com/keys))
 - Supabase project (already configured)
 
 ### Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone <your-repo-url>
    cd <project-directory>
    ```
 
 2. **Install dependencies**
+
    ```bash
    npm install
    ```
 
 3. **Configure environment variables**
 
-   Update the `.env` file with your OpenAI API key:
+   Update the `.env` file with your Groq API key:
+
    ```
    VITE_SUPABASE_URL=https://cacbjjgsvjbsbzbhpxop.supabase.co
    VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-   OPENAI_API_KEY=sk-your-actual-openai-key-here
+   GROQ_API_KEY=gsk_your-actual-groq-key-here
    ```
 
 4. **Start the server**
+
    ```bash
    npm start
    ```
 
    The API will be available at `http://localhost:3010`
 
+## Live API
+
+The live API is deployed on Vercel.
+
+**Base URL**: `https://your-deployment-url.vercel.app/api`
+
+You can test the live endpoints by replacing `http://localhost:3010` with the live base URL in the cURL examples below.
+
 ## API Documentation
 
 ### Base URL
+
 ```
 http://localhost:3010/api
 ```
@@ -65,20 +78,27 @@ http://localhost:3010/api
 ### Endpoints
 
 #### 1. Create Product/Offer
+
 **POST** `/offer`
 
 Create a new product or offer for lead qualification.
 
 **Request Body:**
+
 ```json
 {
   "name": "AI Outreach Automation",
-  "value_props": ["24/7 outreach", "6x more meetings", "AI-powered personalization"],
+  "value_props": [
+    "24/7 outreach",
+    "6x more meetings",
+    "AI-powered personalization"
+  ],
   "ideal_use_cases": ["B2B SaaS", "mid-market", "sales teams"]
 }
 ```
 
 **Example cURL:**
+
 ```bash
 curl -X POST http://localhost:3010/api/offer \
   -H "Content-Type: application/json" \
@@ -90,6 +110,7 @@ curl -X POST http://localhost:3010/api/offer \
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -106,11 +127,13 @@ curl -X POST http://localhost:3010/api/offer \
 ---
 
 #### 2. Upload Leads CSV
+
 **POST** `/leads/upload`
 
 Upload a CSV file containing lead information.
 
 **CSV Format:**
+
 ```csv
 name,role,company,industry,location,linkedin_bio
 Ava Patel,Head of Growth,FlowMetrics,B2B SaaS,San Francisco,Growth leader with 8+ years scaling SaaS companies
@@ -118,12 +141,14 @@ John Smith,Marketing Manager,TechCorp,Technology,New York,Experienced marketing 
 ```
 
 **Example cURL:**
+
 ```bash
 curl -X POST http://localhost:3010/api/leads/upload \
   -F "file=@sample_leads.csv"
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -135,11 +160,13 @@ curl -X POST http://localhost:3010/api/leads/upload \
 ---
 
 #### 3. Score Leads
+
 **POST** `/score`
 
 Run the scoring pipeline on all uploaded leads for a specific offer.
 
 **Request Body:**
+
 ```json
 {
   "offer_id": "uuid-of-offer"
@@ -147,6 +174,7 @@ Run the scoring pipeline on all uploaded leads for a specific offer.
 ```
 
 **Example cURL:**
+
 ```bash
 curl -X POST http://localhost:3010/api/score \
   -H "Content-Type: application/json" \
@@ -154,6 +182,7 @@ curl -X POST http://localhost:3010/api/score \
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -165,16 +194,19 @@ curl -X POST http://localhost:3010/api/score \
 ---
 
 #### 4. Get Results
+
 **GET** `/results`
 
 Retrieve scoring results with optional filters.
 
 **Query Parameters:**
+
 - `offer_id` (optional): Filter by specific offer
 - `intent` (optional): Filter by intent level (High/Medium/Low)
 - `min_score` (optional): Filter by minimum score
 
 **Example cURL:**
+
 ```bash
 curl http://localhost:3010/api/results
 
@@ -183,6 +215,7 @@ curl "http://localhost:3010/api/results?intent=High&min_score=70"
 ```
 
 **Response:**
+
 ```json
 [
   {
@@ -201,6 +234,7 @@ curl "http://localhost:3010/api/results?intent=High&min_score=70"
 ---
 
 #### 5. Export Results as CSV (Bonus)
+
 **GET** `/results/export`
 
 Export scoring results as a downloadable CSV file.
@@ -208,6 +242,7 @@ Export scoring results as a downloadable CSV file.
 **Query Parameters:** Same as `/results`
 
 **Example cURL:**
+
 ```bash
 curl "http://localhost:3010/api/results/export?intent=High" -o results.csv
 ```
@@ -215,11 +250,13 @@ curl "http://localhost:3010/api/results/export?intent=High" -o results.csv
 ---
 
 #### 6. Get All Offers
+
 **GET** `/offers`
 
 Retrieve all created offers.
 
 **Example cURL:**
+
 ```bash
 curl http://localhost:3010/api/offers
 ```
@@ -227,11 +264,13 @@ curl http://localhost:3010/api/offers
 ---
 
 #### 7. Get All Leads
+
 **GET** `/leads`
 
 Retrieve all uploaded leads.
 
 **Example cURL:**
+
 ```bash
 curl http://localhost:3010/api/leads
 ```
@@ -239,11 +278,13 @@ curl http://localhost:3010/api/leads
 ---
 
 #### 8. Health Check
+
 **GET** `/health`
 
 Check if the API is running.
 
 **Example cURL:**
+
 ```bash
 curl http://localhost:3010/health
 ```
@@ -253,11 +294,13 @@ curl http://localhost:3010/health
 ### Rule Layer (0-50 points)
 
 1. **Role Relevance (0-20 points)**
+
    - Decision maker (CEO, CTO, VP, Director, Head of, etc.): **20 points**
    - Influencer (Manager, Lead, Senior, etc.): **10 points**
    - Other roles: **0 points**
 
 2. **Industry Match (0-20 points)**
+
    - Exact ICP match: **20 points**
    - Adjacent industry: **10 points**
    - No match: **0 points**
@@ -269,12 +312,14 @@ curl http://localhost:3010/health
 ### AI Layer (0-50 points)
 
 The AI analyzes the prospect against the offer using:
+
 - LinkedIn bio content
 - Role and industry context
 - Product value propositions
 - Ideal use cases
 
 **AI Intent Mapping:**
+
 - High intent: **50 points**
 - Medium intent: **30 points**
 - Low intent: **10 points**
@@ -289,7 +334,7 @@ The AI analyzes the prospect against the offer using:
 
 ## AI Prompting Strategy
 
-The system sends contextualized prompts to OpenAI that include:
+The system sends contextualized prompts to Groq that include:
 
 1. **Product Context**: Name, value propositions, ideal use cases
 2. **Prospect Context**: Name, role, company, industry, location, LinkedIn bio
@@ -297,6 +342,7 @@ The system sends contextualized prompts to OpenAI that include:
 4. **Structured Output**: JSON format for consistent parsing
 
 **Example Prompt:**
+
 ```
 You are a B2B lead qualification expert. Analyze this prospect's fit for our product/offer.
 
@@ -326,6 +372,7 @@ Respond in this exact JSON format:
 ### Complete Workflow Example
 
 1. **Create an offer:**
+
    ```bash
    curl -X POST http://localhost:3010/api/offer \
      -H "Content-Type: application/json" \
@@ -339,12 +386,14 @@ Respond in this exact JSON format:
    Copy the `id` from the response.
 
 2. **Upload leads:**
+
    ```bash
    curl -X POST http://localhost:3010/api/leads/upload \
      -F "file=@sample_leads.csv"
    ```
 
 3. **Run scoring:**
+
    ```bash
    curl -X POST http://localhost:3010/api/score \
      -H "Content-Type: application/json" \
@@ -352,6 +401,7 @@ Respond in this exact JSON format:
    ```
 
 4. **View results:**
+
    ```bash
    curl http://localhost:3010/api/results
    ```
@@ -404,6 +454,7 @@ The API includes comprehensive error handling:
 - **500 Internal Server Error**: Server or database errors
 
 All errors return JSON with descriptive messages:
+
 ```json
 {
   "error": "Error description",
@@ -421,9 +472,10 @@ This application is ready to deploy to any Node.js hosting platform:
 - **Vercel/Netlify**: Works with serverless functions
 
 **Required Environment Variables:**
+
 - `VITE_SUPABASE_URL`
 - `VITE_SUPABASE_ANON_KEY`
-- `OPENAI_API_KEY`
+- `GROQ_API_KEY`
 
 ## Bonus Features Implemented
 
@@ -443,7 +495,7 @@ This application is ready to deploy to any Node.js hosting platform:
 - Rate limiting and caching
 - Advanced filtering and search
 
-Local Uses : 
+Local Uses :
 ![alt text](image.png)
 ![alt text](image-1.png)
 ![alt text](image-2.png)
