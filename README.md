@@ -63,7 +63,7 @@ A backend service that accepts product/offer information and CSV files of leads,
 
 The live API is deployed on Vercel.
 
-**Base URL**: `https://your-deployment-url.vercel.app/api`
+**Base URL**: `https://ai-lead-scoring-backend.vercel.app/api`
 
 You can test the live endpoints by replacing `http://localhost:3010` with the live base URL in the cURL examples below.
 
